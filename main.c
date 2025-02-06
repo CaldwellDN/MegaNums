@@ -16,7 +16,7 @@ void MegaNum_Init(MegaNum *name) {
     perror("Error Initializing MegaNum");
   }
 
-  strcpy(name->NumStr, "0");
+  strncpy(name->NumStr, "0", 2);
 
   name->length = 1;
 
@@ -44,27 +44,32 @@ void MegaNum_Set(MegaNum *name, char *value) {
   name->NumStr = malloc((name->length+1)*sizeof(char));
   if (name->NumStr == NULL)
     perror("Error allocating memory");
-  strcpy(name->NumStr, value);
+  strncpy(name->NumStr, value, name->length+1);
 }
 
 
-// NOTE: Returns 2 if both vals are equal, 1 if val1 is greater than val2, 0 otherwise
+// NOTE: Returns 0 if both vals are equal, 1 if val1 is greater than val2, -1 otherwise
 int MegaNum_Compare(MegaNum *value1, MegaNum *value2) {
   // Check first if both values are initialized
   if (value1->NumStr == NULL || value2->NumStr == NULL)
     perror("Error reading values during comparison");
   // Basic length check
   if (value1->length != value2->length)
-    return value1->length > value2->length ?  1 : 0;
+    return value1->length > value2->length ?  1 : -1;
 
   if (value1->length == value2->length) {
-    if (strcmp(value1->NumStr, value2->NumStr) == 0)
-      return 2;
+    if (strcmp(value1->NumStr, value2->NumStr) == 1)
+      return 0;
 
     for (size_t i = 0; i < value1->length; i++) {
-      return atoi(&value1->NumStr[i]) > atoi(&value2->NumStr[i]) ? 1 : 0;
+      return atoi(&value1->NumStr[i]) > atoi(&value2->NumStr[i]) ? 1 : -1; // NOTE: MAKE STRTOL()
     }
   }
+}
+
+// Add two MegaNum values together
+void MegaNum_Add(MegaNum *val1, MegaNum *val2) {
+  int largestNumSize = MegaNum_Compare(val1, val2) >= 0 ?
 }
 
 
@@ -74,13 +79,11 @@ int main() {
   MegaNum_Init(&test);
   MegaNum_Init(&test2);
 
-  MegaNum_Set(&test, "10000");
+  MegaNum_Set(&test, "12000");
   MegaNum_Set(&test2, "10000");
 
   int ans = MegaNum_Compare(&test, &test2);
 
-  printf("%d\n", strcmp(test.NumStr, test2.NumStr));
-  printf("%d %d \n", test.length, test2.length);
 
   if (ans == 2){
     printf("Equal");
@@ -90,7 +93,10 @@ int main() {
     printf("test < test2");
   }
 
+  printf("\n");
 
+  printf("%s\n", test.NumStr);
+  printf("%s\n", test2.NumStr);
 
   MegaNum_Terminate(&test);
   MegaNum_Terminate(&test);
